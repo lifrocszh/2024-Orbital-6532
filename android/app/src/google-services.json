@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "985907355450",
+    "project_id": "orbital6532",
+    "storage_bucket": "orbital6532.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:985907355450:android:87ee7fa4c45e16bedc3a03",
+        "android_client_info": {
+          "package_name": "com.example.orbital"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrDGIDjENRgHR6pSxZlaLda1UyAW0mFmg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
