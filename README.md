@@ -62,4 +62,6 @@ The app provides a platform for residents to book facilities, RSVP events, and p
 
 Before running the application, make sure that you have flutter sdk installed, and a android emulator if you are using a windows machine.
 
-**Clone the repository to your local machine**
+1. Clone the repository onto your local machine.
+2. Run `flutter pub get` in the terminal to ensure you have all the dependencies.
+3. Run the main.dart file on any IDE of your choice.
