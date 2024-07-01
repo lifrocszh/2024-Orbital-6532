@@ -57,3 +57,9 @@ The app provides a platform for residents to book facilities, RSVP events, and p
 # **Prototype**
 
 ![image](https://github.com/lifrocszh/Orbital-24-RafflesVUS/assets/163915921/d7a1ea31-7b19-4447-b526-6e202ddce752)
+
+# **Installaion**
+
+Before running the application, make sure that you have flutter sdk installed, and a android emulator if you are using a windows machine.
+
+**Clone the repository to your local machine**
