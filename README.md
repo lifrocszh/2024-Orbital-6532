@@ -1,6 +1,11 @@
 # NUS Orbital 2024 (RafflesVUS) - Milestone 1
 
-Proposed Level of Achievement: Apollo 11
+Proposed Level of Achievement: Gemini
+
+Test email: testing@gmail.com (or create your own)
+Test password: testing
+
+** App bundle: app-release.aab **
 
 # **Motivation**
 
