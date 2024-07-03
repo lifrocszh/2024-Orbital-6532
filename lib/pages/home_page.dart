@@ -10,59 +10,65 @@ class HomePage extends StatefulWidget {
 
   @override
   State<HomePage> createState() => _HomeState();
-
-  // Widget _title() {
-  //   return const Text('Firebase Auth');
-  // }
-
-  // Widget _userID() {
-  //   return Text(user?.email ?? 'User email');
-  // }
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   return Scaffold(
-  //     appBar: AppBar(
-  //       title: _title(),
-  //     ),
-  //     body: Container(
-  //       height: double.infinity,
-  //       width: double.infinity,
-  //       padding: const EdgeInsets.all(20),
-  //       child: Column(
-  //         crossAxisAlignment: CrossAxisAlignment.center,
-  //         mainAxisAlignment: MainAxisAlignment.center,
-  //         children: <Widget>[
-  //           _userID(),
-  //           _signOutButton(),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
 }
 
 class _HomeState extends State<HomePage> {
-  String _name = 'Alexxxxx Tan';
+  final currentUser = FirebaseAuth.instance.currentUser;
+
+  String _name = 'Alex Tan';
   String _id = 'A1234567N';
   DateTime _selectedDate = DateTime.now();
   String _time = '10:00 AM'; // Placeholder for actual time
   String _facility = 'Hard Court'; // Placeholder for actual facility
 
-  final User? user = Auth().currentUser;
-
   Future<void> signOut() async {
     await Auth().signOut();
-    // Navigator.pushReplacement(
-    //   context,
-    //   MaterialPageRoute(builder: (context) => LoginPage()),
-    // );
   }
 
-  Widget _signOutButton() {
+  Widget signOutButton() {
     return ElevatedButton(
       onPressed: signOut,
-      child: const Text('Sign Outttt'),
+      child: const Text(
+        'SIGN OUT',
+        style: TextStyle(fontSize: 25, color: Colors.red),
+      ),
+      style: ButtonStyle(
+          minimumSize: WidgetStateProperty.all(Size(200.0, 80.0)),
+          backgroundColor: WidgetStateProperty.all(Colors.grey[200])),
+    );
+  }
+
+  Widget bookFacilitiesButton() {
+    return ElevatedButton(
+      onPressed: () {
+        // Handle "Book Facilities" button press
+        // Update booking information in state
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => BookingPage()),
+        );
+        setState(() {
+          // Update _selectedDate, _time, and _facility based on booking details
+        });
+      },
+      child: const Text('Book Facilities'),
+      style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.all(Colors.greenAccent)),
+    );
+  }
+
+  Widget announcementsButton() {
+    return ElevatedButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => BookingPage()),
+        );
+        setState(() {});
+      },
+      child: const Text('Make An Announcement'),
+      style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.all(Colors.greenAccent)),
     );
   }
 
@@ -77,140 +83,122 @@ class _HomeState extends State<HomePage> {
         centerTitle: true,
         backgroundColor: Colors.greenAccent,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
-              color: Colors.grey[200],
-              padding: const EdgeInsets.all(10.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    _name,
-                    style: const TextStyle(fontSize: 16.0),
-                  ),
-                  Text(
-                    _id,
-                    style: const TextStyle(fontSize: 16.0),
-                  ),
-                ],
-              ),
+      body: Column(
+        children: [
+          Container(
+            color: Colors.grey[200],
+            padding: const EdgeInsets.all(10.0),
+            // ignore: prefer_interpolation_to_compose_strings
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Logged in as: ",
+                  style: TextStyle(fontSize: 16.0),
+                ),
+                Text(
+                  "${currentUser!.email}",
+                  style: const TextStyle(
+                      fontSize: 16.0, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
-            Container(
-              padding: const EdgeInsets.all(10.0),
-              child: const Text(
-                'Bookings',
-                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-              ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(10.0),
+            child: const Text(
+              'Bookings',
+              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
             ),
-            if (_selectedDate != null)
-              // Display booking information if available
-              Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: const Text(
-                          'Date:',
-                          style: TextStyle(fontSize: 16.0),
-                        ),
+          ),
+          if (_selectedDate != null)
+            // Display booking information if available
+            Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: const Text(
+                        'Date:',
+                        style: TextStyle(fontSize: 16.0),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          DateFormat.yMMMd().format(_selectedDate),
-                          style: const TextStyle(fontSize: 16.0),
-                        ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        DateFormat.yMMMd().format(_selectedDate),
+                        style: const TextStyle(fontSize: 16.0),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 10.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: const Text(
-                          'Time:',
-                          style: TextStyle(fontSize: 16.0),
-                        ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10.0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: const Text(
+                        'Time:',
+                        style: TextStyle(fontSize: 16.0),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          _time,
-                          style: const TextStyle(fontSize: 16.0),
-                        ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        _time,
+                        style: const TextStyle(fontSize: 16.0),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 10.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: const Text(
-                          'Facility:',
-                          style: TextStyle(fontSize: 16.0),
-                        ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10.0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: const Text(
+                        'Facility:',
+                        style: TextStyle(fontSize: 16.0),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          _facility,
-                          style: const TextStyle(fontSize: 16.0),
-                        ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        _facility,
+                        style: const TextStyle(fontSize: 16.0),
                       ),
-                    ],
-                  ),
-                ],
-              ),
-            Container(
-              padding: const EdgeInsets.all(10.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      // Handle "Book Facilities" button press
-                      // Update booking information in state
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => BookingPage()),
-                      );
-                      setState(() {
-                        // Update _selectedDate, _time, and _facility based on booking details
-                      });
-                    },
-                    child: const Text('Book Facilities'),
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: _signOutButton(),
-              // ElevatedButton(
-              //   onPressed: () {
-              //     // Handle logout logic
-              //     // e.g., clear user data, navigate back to login page
-              //     Navigator.pushReplacement(
-              //       context,
-              //       MaterialPageRoute(builder: (context) => LoginPage()),
-              //     );
-              //   },
-              //   style: ElevatedButton.styleFrom(
-              //     backgroundColor: Colors.grey,
-              //   ),
-              //   child: const Text('Log Out'),
-              // ),
+          Container(
+            padding: const EdgeInsets.all(10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [bookFacilitiesButton()],
             ),
-          ],
-        ),
+          ),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10.0),
+                  child: announcementsButton(),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(30.0),
+                  child: signOutButton(),
+                ),
+              ],
+            ),
+          )
+        ],
       ),
     );
   }
