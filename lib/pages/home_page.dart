@@ -66,7 +66,7 @@ class _HomeState extends State<HomePage> {
         );
         setState(() {});
       },
-      child: const Text('Make An Announcement'),
+      child: const Text('Make An Announcement!'),
       style: ButtonStyle(
           backgroundColor: WidgetStateProperty.all(Colors.greenAccent)),
     );
