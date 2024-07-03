@@ -3,6 +3,7 @@
 Proposed Level of Achievement: Gemini
 
 Test email: testing@gmail.com (or create your own)
+
 Test password: testing
 
 ** App bundle: app-release.aab **
