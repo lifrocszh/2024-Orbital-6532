@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+// import 'package:fluttertoast/fluttertoast.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class BookingPage extends StatefulWidget {
@@ -11,7 +11,7 @@ class BookingPage extends StatefulWidget {
 
 class _BookingPageState extends State<BookingPage> {
   final _nameController = TextEditingController();
-  String _nameError = '';
+  // final String _nameError = '';
   DateTime _selectedDate = DateTime.now(); // Initialize with current date
 
   @override
@@ -99,7 +99,7 @@ class _BookingPageState extends State<BookingPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Enter Your Name'),
+          title: const Text('Enter Your Name'),
           content: TextField(
             controller: _nameController,
             decoration: InputDecoration(
@@ -122,7 +122,7 @@ class _BookingPageState extends State<BookingPage> {
                   });
                 }
               },
-              child: Text('SUBMIT'),
+              child: const Text('SUBMIT'),
             ),
           ],
         );
@@ -134,12 +134,12 @@ class _BookingPageState extends State<BookingPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Booking Done!'),
-        content: Text('Your booking has been confirmed.'),
+        title: const Text('Booking Done!'),
+        content: const Text('Your booking has been confirmed.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context), // Close both dialogs
-            child: Text('Ok'),
+            child: const Text('Ok'),
           ),
         ],
       ),

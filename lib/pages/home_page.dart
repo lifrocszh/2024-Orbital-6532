@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:orbital/auth.dart';
 import 'package:intl/intl.dart';
-import 'package:orbital/pages/login_page.dart';
+// import 'package:orbital/pages/login_page.dart';
 import 'package:orbital/pages/booking_page.dart';
+import 'package:orbital/pages/announcement_page.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({super.key});
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomeState();
@@ -15,11 +16,31 @@ class HomePage extends StatefulWidget {
 class _HomeState extends State<HomePage> {
   final currentUser = FirebaseAuth.instance.currentUser;
 
-  String _name = 'Alex Tan';
-  String _id = 'A1234567N';
-  DateTime _selectedDate = DateTime.now();
-  String _time = '10:00 AM'; // Placeholder for actual time
-  String _facility = 'Hard Court'; // Placeholder for actual facility
+  Widget loggedInState() {
+    return Container(
+        color: Colors.grey[200],
+        padding: const EdgeInsets.all(10.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              "Logged in as: ",
+              style: TextStyle(fontSize: 16.0),
+            ),
+            Text(
+              "${currentUser!.email}",
+              style:
+                  const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ));
+  }
+
+  // final String _name = 'Alex Tan';
+  // final String _id = 'A1234567N';
+  final DateTime _selectedDate = DateTime.now();
+  final String _time = '10:00 AM'; // Placeholder for actual time
+  final String _facility = 'Hard Court'; // Placeholder for actual facility
 
   Future<void> signOut() async {
     await Auth().signOut();
@@ -28,13 +49,13 @@ class _HomeState extends State<HomePage> {
   Widget signOutButton() {
     return ElevatedButton(
       onPressed: signOut,
+      style: ButtonStyle(
+          minimumSize: WidgetStateProperty.all(const Size(200.0, 80.0)),
+          backgroundColor: WidgetStateProperty.all(Colors.grey[200])),
       child: const Text(
         'SIGN OUT',
         style: TextStyle(fontSize: 25, color: Colors.red),
       ),
-      style: ButtonStyle(
-          minimumSize: WidgetStateProperty.all(Size(200.0, 80.0)),
-          backgroundColor: WidgetStateProperty.all(Colors.grey[200])),
     );
   }
 
@@ -45,15 +66,13 @@ class _HomeState extends State<HomePage> {
         // Update booking information in state
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => BookingPage()),
+          MaterialPageRoute(builder: (context) => const BookingPage()),
         );
-        setState(() {
-          // Update _selectedDate, _time, and _facility based on booking details
-        });
+        setState(() {});
       },
-      child: const Text('Book Facilities'),
       style: ButtonStyle(
           backgroundColor: WidgetStateProperty.all(Colors.greenAccent)),
+      child: const Text('Book Facilities'),
     );
   }
 
@@ -62,13 +81,13 @@ class _HomeState extends State<HomePage> {
       onPressed: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => BookingPage()),
+          MaterialPageRoute(builder: (context) => const AnnouncementPage()),
         );
         setState(() {});
       },
-      child: const Text('Make An Announcement!'),
       style: ButtonStyle(
           backgroundColor: WidgetStateProperty.all(Colors.greenAccent)),
+      child: const Text('Announcements'),
     );
   }
 
@@ -85,25 +104,7 @@ class _HomeState extends State<HomePage> {
       ),
       body: Column(
         children: [
-          Container(
-            color: Colors.grey[200],
-            padding: const EdgeInsets.all(10.0),
-            // ignore: prefer_interpolation_to_compose_strings
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  "Logged in as: ",
-                  style: TextStyle(fontSize: 16.0),
-                ),
-                Text(
-                  "${currentUser!.email}",
-                  style: const TextStyle(
-                      fontSize: 16.0, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
+          loggedInState(),
           Container(
             padding: const EdgeInsets.all(10.0),
             child: const Text(
@@ -118,9 +119,9 @@ class _HomeState extends State<HomePage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: const Text(
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
                         'Date:',
                         style: TextStyle(fontSize: 16.0),
                       ),
@@ -138,9 +139,9 @@ class _HomeState extends State<HomePage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: const Text(
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
                         'Time:',
                         style: TextStyle(fontSize: 16.0),
                       ),
@@ -158,9 +159,9 @@ class _HomeState extends State<HomePage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: const Text(
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
                         'Facility:',
                         style: TextStyle(fontSize: 16.0),
                       ),
@@ -183,21 +184,19 @@ class _HomeState extends State<HomePage> {
               children: [bookFacilitiesButton()],
             ),
           ),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10.0),
-                  child: announcementsButton(),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(30.0),
-                  child: signOutButton(),
-                ),
-              ],
-            ),
-          )
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10.0),
+                child: announcementsButton(),
+              ),
+              Container(
+                padding: const EdgeInsets.all(30.0),
+                child: signOutButton(),
+              ),
+            ],
+          ),
         ],
       ),
     );
