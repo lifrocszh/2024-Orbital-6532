@@ -1,233 +1,222 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../auth.dart';
 
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+  final VoidCallback showLoginPage;
+  const RegisterPage({super.key, required this.showLoginPage});
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  final GlobalKey<FormState> _formKey = GlobalKey();
+  String? errorMessage = '';
+  bool isLogin = true;
 
-  final FocusNode _focusNodeEmail = FocusNode();
-  final FocusNode _focusNodePassword = FocusNode();
-  final FocusNode _focusNodeConfirmPassword = FocusNode();
-  final TextEditingController _controllerUsername = TextEditingController();
-  final TextEditingController _controllerEmail = TextEditingController();
-  final TextEditingController _controllerPassword = TextEditingController();
-  final TextEditingController _controllerConFirmPassword =
+  // final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
       TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
 
-  final Box _boxAccounts = Hive.box("accounts");
-  bool _obscurePassword = true;
+  // Future<void> signInWithEmailAndPassword() async {
+  //   try {
+  //     await Auth().signInWithEmailAndPassword(
+  //       email: _emailController.text,
+  //       password: _passwordController.text,
+  //     );
+  //   } on FirebaseAuthException catch (e) {
+  //     setState(() {
+  //       errorMessage = e.message;
+  //     });
+  //   }
+  // }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 30.0),
-          child: Column(
-            children: [
-              const SizedBox(height: 100),
-              Text(
-                "Register",
-                style: Theme.of(context).textTheme.headlineLarge,
-              ),
-              const SizedBox(height: 10),
-              Text(
-                "Create your account",
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 35),
-              TextFormField(
-                controller: _controllerUsername,
-                keyboardType: TextInputType.name,
-                decoration: InputDecoration(
-                  labelText: "Username",
-                  prefixIcon: const Icon(Icons.person_outline),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                validator: (String? value) {
-                  if (value == null || value.isEmpty) {
-                    return "Please enter username.";
-                  } else if (_boxAccounts.containsKey(value)) {
-                    return "Username is already registered.";
-                  }
+  Future<void> createUserWithEmailAndPassword() async {
+    if (passwordsMatch()) {
+      try {
+        await Auth().createUserWithEmailAndPassword(
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
+      } on FirebaseAuthException catch (e) {
+        setState(() {
+          errorMessage = e.message;
+        });
+      }
+    } else {
+      errorMessage = 'Passwords do not match';
+    }
+  }
 
-                  return null;
-                },
-                onEditingComplete: () => _focusNodeEmail.requestFocus(),
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                controller: _controllerEmail,
-                focusNode: _focusNodeEmail,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: "Email",
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                validator: (String? value) {
-                  if (value == null || value.isEmpty) {
-                    return "Please enter email.";
-                  } else if (!(value.contains('@') && value.contains('.'))) {
-                    return "Invalid email";
-                  }
-                  return null;
-                },
-                onEditingComplete: () => _focusNodePassword.requestFocus(),
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                controller: _controllerPassword,
-                obscureText: _obscurePassword,
-                focusNode: _focusNodePassword,
-                keyboardType: TextInputType.visiblePassword,
-                decoration: InputDecoration(
-                  labelText: "Password",
-                  prefixIcon: const Icon(Icons.password_outlined),
-                  suffixIcon: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                      icon: _obscurePassword
-                          ? const Icon(Icons.visibility_outlined)
-                          : const Icon(Icons.visibility_off_outlined)),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                validator: (String? value) {
-                  if (value == null || value.isEmpty) {
-                    return "Please enter password.";
-                  } else if (value.length < 8) {
-                    return "Password must be at least 8 character.";
-                  }
-                  return null;
-                },
-                onEditingComplete: () =>
-                    _focusNodeConfirmPassword.requestFocus(),
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                controller: _controllerConFirmPassword,
-                obscureText: _obscurePassword,
-                focusNode: _focusNodeConfirmPassword,
-                keyboardType: TextInputType.visiblePassword,
-                decoration: InputDecoration(
-                  labelText: "Confirm Password",
-                  prefixIcon: const Icon(Icons.password_outlined),
-                  suffixIcon: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                      icon: _obscurePassword
-                          ? const Icon(Icons.visibility_outlined)
-                          : const Icon(Icons.visibility_off_outlined)),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                validator: (String? value) {
-                  if (value == null || value.isEmpty) {
-                    return "Please enter password.";
-                  } else if (value != _controllerPassword.text) {
-                    return "Password doesn't match.";
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 50),
-              Column(
-                children: [
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    onPressed: () {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        _boxAccounts.put(
-                          _controllerUsername.text,
-                          _controllerConFirmPassword.text,
-                        );
+  bool passwordsMatch() {
+    return _passwordController.text == _confirmPasswordController.text;
+  }
 
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            width: 200,
-                            backgroundColor:
-                                Theme.of(context).colorScheme.secondary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            behavior: SnackBarBehavior.floating,
-                            content: const Text("Registered Successfully"),
-                          ),
-                        );
-
-                        _formKey.currentState?.reset();
-
-                        Navigator.pop(context);
-                      }
-                    },
-                    child: const Text("Register"),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("Already have an account?"),
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text("Login"),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
+  Widget _errorMessage() {
+    return Text(
+      errorMessage == '' ? '' : '$errorMessage',
+      style: const TextStyle(color: Colors.red),
     );
+  }
+
+  Widget _submitButton() {
+    return ElevatedButton(
+      onPressed: createUserWithEmailAndPassword,
+      child: const Text('Register'),
+    );
+  }
+
+  Widget _registerButton() {
+    return TextButton(
+        onPressed: widget.showLoginPage, child: const Text('Login instead'));
   }
 
   @override
   void dispose() {
-    _focusNodeEmail.dispose();
-    _focusNodePassword.dispose();
-    _focusNodeConfirmPassword.dispose();
-    _controllerUsername.dispose();
-    _controllerEmail.dispose();
-    _controllerPassword.dispose();
-    _controllerConFirmPassword.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            'Register',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.greenAccent,
+        ),
+        backgroundColor: Colors.grey[300],
+        body: Container(
+            height: double.infinity,
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const SizedBox(height: 50),
+
+                // Logo text
+                Text(
+                  'HELLO THERE!',
+                  style: TextStyle(
+                      color: Colors.grey[700],
+                      fontSize: 40,
+                      fontWeight: FontWeight.w900),
+                ),
+
+                const SizedBox(height: 10),
+
+                Text(
+                  'Register below with your details',
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontSize: 17,
+                  ),
+                ),
+
+                const SizedBox(height: 15),
+
+                // textfields
+                Container(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: TextField(
+                    controller: _nameController,
+                    decoration: InputDecoration(
+                      hintText: 'Name',
+                      fillColor: Colors.grey[100],
+                      filled: true,
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.deepPurple),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+
+                Container(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: TextField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      hintText: 'Email',
+                      fillColor: Colors.grey[100],
+                      filled: true,
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.deepPurple),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+
+                Container(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: TextField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      hintText: 'Password',
+                      fillColor: Colors.grey[100],
+                      filled: true,
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.deepPurple),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+
+                Container(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: TextField(
+                    controller: _confirmPasswordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      hintText: 'Confirm Password',
+                      fillColor: Colors.grey[100],
+                      filled: true,
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.deepPurple),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+
+                Container(
+                  padding:
+                      const EdgeInsetsDirectional.only(top: 10, bottom: 10),
+                  child: _errorMessage(),
+                ),
+
+                _submitButton(),
+                _registerButton(),
+              ],
+            )));
   }
 }

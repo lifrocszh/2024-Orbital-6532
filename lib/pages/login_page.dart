@@ -4,7 +4,7 @@ import '../auth.dart';
 
 class LoginPage extends StatefulWidget {
   final VoidCallback showRegisterPage;
-  const LoginPage({super.key});
+  const LoginPage({super.key, required this.showRegisterPage});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -31,34 +31,18 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Future<void> createUserWithEmailAndPassword() async {
-    try {
-      await Auth().createUserWithEmailAndPassword(
-        email: _emailController.text,
-        password: _passwordController.text,
-      );
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        errorMessage = e.message;
-      });
-    }
-  }
-
-  Widget _title() {
-    return const Text('Sign In');
-  }
-
-  Widget _entryField(
-    String title,
-    TextEditingController controller,
-  ) {
-    return TextField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: title,
-      ),
-    );
-  }
+  // Future<void> createUserWithEmailAndPassword() async {
+  //   try {
+  //     await Auth().createUserWithEmailAndPassword(
+  //       email: _emailController.text,
+  //       password: _passwordController.text,
+  //     );
+  //   } on FirebaseAuthException catch (e) {
+  //     setState(() {
+  //       errorMessage = e.message;
+  //     });
+  //   }
+  // }
 
   Widget _errorMessage() {
     return Text(errorMessage == '' ? '' : 'hmmm ? $errorMessage');
@@ -66,28 +50,34 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _submitButton() {
     return ElevatedButton(
-      onPressed:
-          isLogin ? signInWithEmailAndPassword : createUserWithEmailAndPassword,
-      child: Text(isLogin ? 'Login' : 'Register'),
+      onPressed: signInWithEmailAndPassword,
+      child: const Text('Login'),
     );
   }
 
-  Widget _loginOrRegisterButton() {
+  Widget _loginButton() {
     return TextButton(
-      onPressed: () {
-        setState(() {
-          isLogin = !isLogin;
-        });
-      },
-      child: Text(isLogin ? 'Register instead' : 'Login instead'),
-    );
+        onPressed: widget.showRegisterPage,
+        child: const Text('Register instead'));
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: _title(),
+          title: const Text(
+            'Sign in',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.greenAccent,
         ),
         body: Container(
             height: double.infinity,
@@ -97,12 +87,57 @@ class _LoginPageState extends State<LoginPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                // _entryField('username', _usernameController),
-                _entryField('Email', _emailController),
-                _entryField('Password', _passwordController),
+                const SizedBox(height: 50),
+
+                // logo
+                const Icon(
+                  Icons.lock,
+                  size: 100,
+                ),
+
+                const SizedBox(height: 50),
+
+                // welcome back, you've been missed!
+                Text(
+                  'WELCOME BACK',
+                  style: TextStyle(
+                      color: Colors.grey[700],
+                      fontSize: 40,
+                      fontWeight: FontWeight.w900),
+                ),
+
+                const SizedBox(height: 10),
+
+                Text(
+                  'You\'ve been missed',
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontSize: 17,
+                  ),
+                ),
+
+                const SizedBox(height: 25),
+
+                TextField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                  ),
+                ),
+
+                TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Password',
+                  ),
+                ),
+
                 _errorMessage(),
                 _submitButton(),
-                _loginOrRegisterButton(),
+                _loginButton(),
+
+                const SizedBox(height: 50),
               ],
             )));
   }

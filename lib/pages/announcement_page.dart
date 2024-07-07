@@ -78,6 +78,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
           Expanded(
             child: TextField(
               controller: _textEditingController,
+              onSubmitted: postAnnouncementOnSubmit,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 hintText: 'Write an announcement',
@@ -105,9 +106,21 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
         'Message': _textEditingController.text,
         'Timestamp': Timestamp.now(),
       });
+      // clear text box
+      _textEditingController.clear();
     }
-    // clear text box
-    _textEditingController.clear();
+  }
+
+  void postAnnouncementOnSubmit(String string) {
+    if (string != '') {
+      FirebaseFirestore.instance.collection("User Announcements").add({
+        'Email': currentUser?.email,
+        'Message': string,
+        'Timestamp': Timestamp.now(),
+      });
+      // clear text box
+      _textEditingController.clear();
+    }
   }
 
   @override
