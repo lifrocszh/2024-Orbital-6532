@@ -1,14 +1,26 @@
-class User {
-  final String username;
-  final String studentID;
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
-  const User(this.username, this.studentID);
+class GetUserID extends StatelessWidget {
+  final String docID;
 
-  String get_username() {
-    return username;
-  }
+  GetUserID({required this.docID});
 
-  String get_studentID() {
-    return studentID;
+  @override
+  Widget build(BuildContext context) {
+    // get collection
+    CollectionReference users = FirebaseFirestore.instance.collection('Users');
+
+    return FutureBuilder<DocumentSnapshot>(
+      future: users.doc(docID).get(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          Map<String, dynamic> data =
+              snapshot.data!.data() as Map<String, dynamic>;
+          return Text('Name: ${data['Name']}');
+        }
+        return Text('Loading');
+      },
+    );
   }
 }

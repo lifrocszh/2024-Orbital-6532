@@ -66,66 +66,98 @@ class _LoginPageState extends State<LoginPage> {
           centerTitle: true,
           backgroundColor: Colors.greenAccent,
         ),
-        body: Container(
-            height: double.infinity,
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                const SizedBox(height: 50),
+        body: SingleChildScrollView(
+          child: SafeArea(
+            child: Center(
+              child: Container(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      const SizedBox(height: 50),
 
-                // logo
-                const Icon(
-                  Icons.lock,
-                  size: 100,
-                ),
+                      // logo
+                      const Icon(
+                        Icons.lock,
+                        size: 100,
+                      ),
 
-                const SizedBox(height: 50),
+                      const SizedBox(height: 50),
 
-                // welcome back, you've been missed!
-                Text(
-                  'WELCOME BACK',
-                  style: TextStyle(
-                      color: Colors.grey[700],
-                      fontSize: 40,
-                      fontWeight: FontWeight.w900),
-                ),
+                      // welcome back, you've been missed!
+                      Text(
+                        'WELCOME BACK',
+                        style: TextStyle(
+                            color: Colors.grey[700],
+                            fontSize: 40,
+                            fontWeight: FontWeight.w900),
+                      ),
 
-                const SizedBox(height: 10),
+                      const SizedBox(height: 10),
 
-                Text(
-                  'You\'ve been missed',
-                  style: TextStyle(
-                    color: Colors.grey[700],
-                    fontSize: 17,
-                  ),
-                ),
+                      Text(
+                        'You\'ve been missed',
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontSize: 17,
+                        ),
+                      ),
 
-                const SizedBox(height: 25),
+                      const SizedBox(height: 25),
 
-                TextField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                  ),
-                ),
+                      Container(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: TextField(
+                          controller: _emailController,
+                          decoration: InputDecoration(
+                            hintText: 'Email',
+                            fillColor: Colors.grey[100],
+                            filled: true,
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(color: Colors.white),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide:
+                                  const BorderSide(color: Colors.deepPurple),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
 
-                TextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
-                  ),
-                ),
+                      Container(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: TextField(
+                          controller: _passwordController,
+                          obscureText: true,
+                          decoration: InputDecoration(
+                            hintText: 'Password',
+                            fillColor: Colors.grey[100],
+                            filled: true,
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(color: Colors.white),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide:
+                                  const BorderSide(color: Colors.deepPurple),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
 
-                _errorMessage(),
-                _submitButton(),
-                _loginButton(),
+                      _errorMessage(),
+                      _submitButton(),
+                      _loginButton(),
 
-                const SizedBox(height: 50),
-              ],
-            )));
+                      const SizedBox(height: 50),
+                    ],
+                  )),
+            ),
+          ),
+        ));
   }
 }
