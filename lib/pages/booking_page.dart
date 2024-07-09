@@ -1,147 +1,120 @@
 import 'package:flutter/material.dart';
-// import 'package:fluttertoast/fluttertoast.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class BookingPage extends StatefulWidget {
-  const BookingPage({super.key});
-
   @override
-  State<BookingPage> createState() => _BookingPageState();
+  _BookingPageState createState() => _BookingPageState();
 }
 
 class _BookingPageState extends State<BookingPage> {
-  final _nameController = TextEditingController();
-  // final String _nameError = '';
-  DateTime _selectedDate = DateTime.now(); // Initialize with current date
+  DateTime _selectedDay = DateTime.now();
+  DateTime _focusedDay = DateTime.now();
+  TimeOfDay selectedTime = TimeOfDay.now();
+  String selectedHairdresser = '';
+  List<String> hairdressers =
+      []; // This will be populated with hairdressers from Firestore
+
+  @override
+  void initState() {
+    super.initState();
+    fetchHairdressers();
+  }
+
+  fetchHairdressers() async {
+    // Fetch hairdresser (type 2 users) from Firestore and update local list
+    var querySnapshot = await FirebaseFirestore.instance
+        .collection('Users')
+        .where('userType', isEqualTo: 2)
+        .get();
+    setState(() {
+      hairdressers = querySnapshot.docs
+          .map((doc) => doc.get('userName') as String)
+          .toList();
+    });
+  }
+
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: selectedTime,
+    );
+    if (picked != null && picked != selectedTime) {
+      setState(() {
+        selectedTime = picked;
+      });
+    }
+  }
+
+  bookAppointment() async {
+    final User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final uid = user.uid;
+
+      await FirebaseFirestore.instance.collection('Booking').add({
+        'userId': uid,
+        'hairdresser': selectedHairdresser,
+        'date': _selectedDay,
+        'time': selectedTime.format(context),
+      });
+
+      // Show a confirmation message
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Appointment Booked!'),
+      ));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Facilities'),
-        centerTitle: true,
-        backgroundColor: Colors.greenAccent,
+        title: Text('Book an Appointment'),
       ),
       body: SingleChildScrollView(
         child: Column(
-          children: [
-            selectDateBar(),
-            buildCalendar(),
-            bookSlotButton(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget buildCalendar() {
-    return TableCalendar(
-      firstDay: DateTime(DateTime.now().year - 1),
-      lastDay: DateTime(DateTime.now().year + 1),
-      onDaySelected: (selectedDate, focusedDay) {
-        setState(() {
-          _selectedDate = selectedDate;
-        });
-      },
-      focusedDay: _selectedDate,
-      calendarFormat: CalendarFormat.month,
-      startingDayOfWeek: StartingDayOfWeek.sunday,
-      daysOfWeekVisible: true,
-      rowHeight: 50.0,
-      headerStyle: const HeaderStyle(
-        formatButtonVisible: false,
-        titleTextStyle: TextStyle(fontSize: 16.0),
-      ),
-      calendarStyle: const CalendarStyle(
-        selectedTextStyle: TextStyle(color: Colors.white),
-        selectedDecoration: BoxDecoration(
-          color: Colors.yellow,
-          shape: BoxShape.circle,
-        ),
-      ),
-      // Remove selectedDayPredicate as it's not needed
-    );
-  }
-
-  Widget selectDateBar() {
-    return Container(
-      padding: const EdgeInsets.all(10.0),
-      child: const Text(
-        'Select Date',
-        style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-
-  Widget bookSlotButton() {
-    return Container(
-      padding: const EdgeInsets.all(10.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ElevatedButton(
-            onPressed: () => {
-              // Fluttertoast.showToast(msg: "yolo")
-              _showBookingDialog(context)
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-            ),
-            child: const Text('Book this slot'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showBookingDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Enter Your Name'),
-          content: TextField(
-            controller: _nameController,
-            decoration: InputDecoration(
-              hintText: 'Enter Your Name',
-              errorText: _nameController.text.isEmpty
-                  ? 'Please enter your name'
-                  : null,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                if (_nameController.text.isNotEmpty) {
-                  Navigator.pop(context); // Close this dialog
-                  _showBookingConfirmation(
-                      context); // Show booking confirmation
-                } else {
-                  setState(() {
-                    // Update error message if needed (assuming using a stateful widget)
-                  });
-                }
+          children: <Widget>[
+            TableCalendar(
+              firstDay: DateTime.utc(2010, 10, 16),
+              lastDay: DateTime.utc(2040, 3, 14),
+              focusedDay: _focusedDay,
+              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+              onDaySelected: (selectedDay, focusedDay) {
+                setState(() {
+                  _selectedDay = selectedDay;
+                  _focusedDay =
+                      focusedDay; // update `_focusedDay` here to change the calendar's focus without rebuilding it completely
+                });
               },
-              child: const Text('SUBMIT'),
+            ),
+            ListTile(
+              title: Text('Select Time'),
+              trailing: Text(selectedTime.format(context)),
+              onTap: () => _selectTime(context),
+            ),
+            DropdownButton<String>(
+              value: selectedHairdresser.isEmpty ? null : selectedHairdresser,
+              hint: Text('Select a Hairdresser'),
+              onChanged: (newValue) {
+                setState(() {
+                  selectedHairdresser = newValue ?? '';
+                });
+              },
+              items: hairdressers.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+            ElevatedButton(
+              onPressed: bookAppointment,
+              child: Text('Book Appointment'),
             ),
           ],
-        );
-      },
-    );
-  }
-
-  void _showBookingConfirmation(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Booking Done!'),
-        content: const Text('Your booking has been confirmed.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context), // Close both dialogs
-            child: const Text('Ok'),
-          ),
-        ],
+        ),
       ),
     );
   }
