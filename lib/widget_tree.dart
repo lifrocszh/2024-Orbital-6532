@@ -1,6 +1,7 @@
 import 'package:orbital/auth.dart';
+import 'package:orbital/pages/Auth/auth_page.dart';
 import 'package:orbital/pages/home_page.dart';
-import 'package:orbital/pages/login_page.dart';
+// import 'package:orbital/pages/login_page.dart';
 import 'package:flutter/material.dart';
 
 class WidgetTree extends StatefulWidget {
@@ -22,7 +23,7 @@ class _WidgetTreeState extends State<WidgetTree> {
         } else {
           print('gg login page'); // remember change back to LoginPage()
 
-          return LoginPage();
+          return AuthPage();
         }
       },
     );
