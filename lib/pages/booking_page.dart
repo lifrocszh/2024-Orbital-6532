@@ -13,9 +13,20 @@ class _BookingPageState extends State<BookingPage> {
   DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
   TimeOfDay selectedTime = TimeOfDay.now();
-  String selectedHairdresser = '';
-  List<String> hairdressers =
-      []; // This will be populated with hairdressers from Firestore
+  static List<String> list = [
+    'Hall',
+    'Basketball Court',
+    'Lounge',
+    'Study Room'
+  ];
+  List<DropdownMenuItem<String>> dropdownlist =
+      list.map<DropdownMenuItem<String>>((String facilityName) {
+    return DropdownMenuItem<String>(
+      value: facilityName,
+      child: Text(facilityName),
+    );
+  }).toList();
+  String? _selectedFacility;
 
   @override
   void initState() {
@@ -30,7 +41,7 @@ class _BookingPageState extends State<BookingPage> {
         .where('userType', isEqualTo: 2)
         .get();
     setState(() {
-      hairdressers = querySnapshot.docs
+      list = querySnapshot.docs
           .map((doc) => doc.get('userName') as String)
           .toList();
     });
@@ -55,15 +66,17 @@ class _BookingPageState extends State<BookingPage> {
 
       await FirebaseFirestore.instance.collection('Booking').add({
         'userId': uid,
-        'hairdresser': selectedHairdresser,
+        'facility': _selectedFacility,
         'date': _selectedDay,
         'time': selectedTime.format(context),
       });
 
       // Show a confirmation message
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Appointment Booked!'),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Facility Booked!'),
+        ),
+      );
     }
   }
 
@@ -71,7 +84,12 @@ class _BookingPageState extends State<BookingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Book an Appointment'),
+        backgroundColor: Colors.greenAccent,
+        title: const Text(
+          'Book Facilities',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -90,28 +108,38 @@ class _BookingPageState extends State<BookingPage> {
               },
             ),
             ListTile(
-              title: Text('Select Time'),
+              title: const Text('Select Time'),
               trailing: Text(selectedTime.format(context)),
               onTap: () => _selectTime(context),
             ),
-            DropdownButton<String>(
-              value: selectedHairdresser.isEmpty ? null : selectedHairdresser,
-              hint: Text('Select a Hairdresser'),
-              onChanged: (newValue) {
-                setState(() {
-                  selectedHairdresser = newValue ?? '';
-                });
-              },
-              items: hairdressers.map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
+
+            // select facility
+            Container(
+              padding: const EdgeInsets.all(15),
+              child: DropdownButton<String>(
+                value:
+                    _selectedFacility, // Initially set to null for empty selection
+                isExpanded: true,
+                hint: const Text('Select Facility'),
+                icon: const Icon(Icons.arrow_downward),
+                elevation: 10,
+                onChanged: (String? value) {
+                  setState(() {
+                    _selectedFacility = value!;
+                  });
+                },
+                items: dropdownlist,
+                //     list.map<DropdownMenuItem<String>>((String facilityName) {
+                //   return DropdownMenuItem<String>(
+                //     value: facilityName,
+                //     child: Text(facilityName),
+                //   );
+                // }).toList(),
+              ),
             ),
             ElevatedButton(
               onPressed: bookAppointment,
-              child: Text('Book Appointment'),
+              child: const Text('Book Facility'),
             ),
           ],
         ),
