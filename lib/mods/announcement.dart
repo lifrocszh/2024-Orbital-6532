@@ -16,8 +16,8 @@ class Announcement extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),
       ),
-      margin: EdgeInsets.only(top: 25, left: 25, right: 25),
-      padding: EdgeInsets.all(25),
+      margin: const EdgeInsets.only(top: 25, left: 25, right: 25),
+      padding: const EdgeInsets.all(25),
       child: Column(
         children: [
           Text(
