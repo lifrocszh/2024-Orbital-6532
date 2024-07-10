@@ -34,23 +34,66 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
         ));
   }
 
-  Widget announcementsWidget() {
+  // Widget announcementsWidget() {
+  //   return Expanded(
+  //     child: StreamBuilder(
+  //       stream: FirebaseFirestore.instance
+  //           .collection("User Announcements")
+  //           .orderBy(
+  //             "Timestamp",
+  //             descending: true,
+  //           )
+  //           .snapshots(),
+  //       builder: (context, snapshot) {
+  //         if (snapshot.hasData) {
+  //           return ListView.builder(
+  //             itemCount: snapshot.data!.docs.length,
+  //             itemBuilder: (context, index) {
+  //               // get message
+  //               final post = snapshot.data!.docs[index];
+  //               return Announcement(
+  //                 message: post['Message'],
+  //                 user: post['Email'],
+  //               );
+  //             },
+  //           );
+  //         } else if (snapshot.hasError) {
+  //           return Center(
+  //             child: Text('Error: ${snapshot.error}'),
+  //           );
+  //         }
+  //         return const Center(
+  //           child: CircularProgressIndicator(),
+  //         );
+  //       },
+  //     ),
+  //   );
+  // }
+
+  Widget announcementWidget() {
+    final ScrollController _scrollController = ScrollController();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      }
+    });
+
     return Expanded(
       child: StreamBuilder(
         stream: FirebaseFirestore.instance
             .collection("User Announcements")
-            .orderBy(
-              "Timestamp",
-              descending: false,
-            )
+            .orderBy("Timestamp", descending: false)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return ListView.builder(
               itemCount: snapshot.data!.docs.length,
+              reverse: true,
+              controller: _scrollController,
               itemBuilder: (context, index) {
-                // get message
-                final post = snapshot.data!.docs[index];
+                final reversedIndex = snapshot.data!.docs.length - 1 - index;
+                final post = snapshot.data!.docs[reversedIndex];
                 return Announcement(
                   message: post['Message'],
                   user: post['Email'],
@@ -58,13 +101,9 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
               },
             );
           } else if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error}'),
-            );
+            return Center(child: Text('Error: ${snapshot.error}'));
           }
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         },
       ),
     );
@@ -139,7 +178,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
           children: [
             // logged in state
             loggedInState(),
-            announcementsWidget(),
+            announcementWidget(),
             announcementTextBox(),
           ],
         ));

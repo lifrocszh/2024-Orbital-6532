@@ -28,24 +28,24 @@ class _BookingPageState extends State<BookingPage> {
   }).toList();
   String? _selectedFacility;
 
-  @override
-  void initState() {
-    super.initState();
-    fetchHairdressers();
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   fetchHairdressers();
+  // }
 
-  fetchHairdressers() async {
-    // Fetch hairdresser (type 2 users) from Firestore and update local list
-    var querySnapshot = await FirebaseFirestore.instance
-        .collection('Users')
-        .where('userType', isEqualTo: 2)
-        .get();
-    setState(() {
-      list = querySnapshot.docs
-          .map((doc) => doc.get('userName') as String)
-          .toList();
-    });
-  }
+  // fetchHairdressers() async {
+  //   // Fetch facilityies from Firestore and update local list
+  //   var querySnapshot = await FirebaseFirestore.instance
+  //       .collection('Users')
+  //       .where('userType', isEqualTo: 2)
+  //       .get();
+  //   setState(() {
+  //     list = querySnapshot.docs
+  //         .map((doc) => doc.get('userName') as String)
+  //         .toList();
+  //   });
+  // }
 
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
