@@ -16,25 +16,81 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
 
   Widget loggedInState() {
     return Container(
-        color: Colors.grey[200],
-        padding: const EdgeInsets.all(10.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              "Logged in as: ",
-              style: TextStyle(fontSize: 16.0),
-            ),
-            Text(
-              "${currentUser!.email}",
-              style:
-                  const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ));
+      color: Colors.grey[200],
+      padding: const EdgeInsets.all(10.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text(
+            "Logged in as: ",
+            style: TextStyle(fontSize: 16.0),
+          ),
+          Text(
+            "${currentUser!.email}",
+            style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
   }
 
-  Widget announcementsWidget() {
+  // Widget announcementsWidget() {
+  //   return Expanded(
+  //     child: StreamBuilder(
+  //       stream: FirebaseFirestore.instance
+  //           .collection("User Announcements")
+  //           .orderBy(
+  //             "Timestamp",
+  //             descending: true,
+  //           )
+  //           .snapshots(),
+  //       builder: (context, snapshot) {
+  //         if (snapshot.hasData) {
+  //           return ListView.builder(
+  //             itemCount: snapshot.data!.docs.length,
+  //             itemBuilder: (context, index) {
+  //               // get message
+  //               final post = snapshot.data!.docs[index];
+  //               return Announcement(
+  //                 message: post['Message'],
+  //                 user: post['Email'],
+  //               );
+  //             },
+  //           );
+  //         } else if (snapshot.hasError) {
+  //           return Center(
+  //             child: Text('Error: ${snapshot.error}'),
+  //           );
+  //         }
+  //         return const Center(
+  //           child: CircularProgressIndicator(),
+  //         );
+  //       },
+  //     ),
+  //   );
+  // }
+
+  Future<String> getUserName() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(currentUser!.email)
+          .get();
+      return userDoc['Name'] ?? user.email ?? 'Anonymous';
+    }
+    return 'Anonymous';
+  }
+
+  Widget announcementWidget() {
+    final ScrollController _scrollController = ScrollController();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      }
+    });
+
     return Expanded(
       child: StreamBuilder(
         stream: FirebaseFirestore.instance
@@ -53,7 +109,10 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                 final post = snapshot.data!.docs[index];
                 return Announcement(
                   message: post['Message'],
-                  user: post['Email'],
+                  user: post['Name'],
+                  docId: post.id,
+                  votes: Map<String, dynamic>.from(post['Votes'] ?? {}),
+                  onVote: _handleVote,
                 );
               },
             );
@@ -68,6 +127,18 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
         },
       ),
     );
+  }
+
+  void _handleVote(String docId, bool vote) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      FirebaseFirestore.instance
+          .collection("User Announcements")
+          .doc(docId)
+          .set({
+        'Votes': {user.email: vote}
+      }, SetOptions(merge: true));
+    }
   }
 
   Widget announcementTextBox() {
@@ -91,34 +162,36 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
               Icons.arrow_circle_up_outlined,
               size: 40.0,
             ),
-          )
+          ),
         ],
       ),
     );
   }
 
-  void postAnnouncement() {
-    // only post if there is something in the textfield
+  Future<void> postAnnouncement() async {
     if (_textEditingController.text.isNotEmpty) {
-      // store in firebase
+      String userName = await getUserName();
       FirebaseFirestore.instance.collection("User Announcements").add({
         'Email': currentUser?.email,
+        'Name': userName,
         'Message': _textEditingController.text,
         'Timestamp': Timestamp.now(),
+        'Votes': {},
       });
-      // clear text box
       _textEditingController.clear();
     }
   }
 
-  void postAnnouncementOnSubmit(String string) {
+  Future<void> postAnnouncementOnSubmit(String string) async {
     if (string != '') {
+      String userName = await getUserName();
       FirebaseFirestore.instance.collection("User Announcements").add({
         'Email': currentUser?.email,
+        'Name': userName,
         'Message': string,
         'Timestamp': Timestamp.now(),
+        'Votes': {},
       });
-      // clear text box
       _textEditingController.clear();
     }
   }
@@ -139,7 +212,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
           children: [
             // logged in state
             loggedInState(),
-            announcementsWidget(),
+            announcementWidget(),
             announcementTextBox(),
           ],
         ));
