@@ -7,7 +7,7 @@ import 'booking_page.dart';
 import 'announcement_page.dart';
 import 'package:orbital/mods/list_tile.dart';
 import 'package:intl/intl.dart';
-import 'package:orbital/mods/booking.dart'; // Import the new booking.dart file
+import 'package:orbital/mods/booking.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
