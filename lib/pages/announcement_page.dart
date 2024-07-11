@@ -95,18 +95,17 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
       child: StreamBuilder(
         stream: FirebaseFirestore.instance
             .collection("User Announcements")
-            .orderBy(
-              "Timestamp",
-              descending: false,
-            )
+            .orderBy("Timestamp", descending: false)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return ListView.builder(
               itemCount: snapshot.data!.docs.length,
+              reverse: true,
+              controller: _scrollController,
               itemBuilder: (context, index) {
-                // get message
-                final post = snapshot.data!.docs[index];
+                final reversedIndex = snapshot.data!.docs.length - 1 - index;
+                final post = snapshot.data!.docs[reversedIndex];
                 return Announcement(
                   message: post['Message'],
                   user: post['Name'],
@@ -117,13 +116,9 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
               },
             );
           } else if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error}'),
-            );
+            return Center(child: Text('Error: ${snapshot.error}'));
           }
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         },
       ),
     );

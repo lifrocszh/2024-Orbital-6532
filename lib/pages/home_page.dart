@@ -211,8 +211,7 @@ class _HomeState extends State<HomePage> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => const BookingPage()),
+                      MaterialPageRoute(builder: (context) => BookingPage()),
                     );
                     setState(() {});
                   },
