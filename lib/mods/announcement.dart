@@ -34,7 +34,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Announcement extends StatefulWidget {
   final String message;
@@ -99,10 +98,11 @@ class _AnnouncementState extends State<Announcement> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(widget.user, style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(height: 4),
+            Text(widget.user,
+                style: const TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
             Text(widget.message),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
