@@ -36,6 +36,7 @@ class _RegisterPageState extends State<RegisterPage> {
         .set({
       'Name': _nameController.text,
       'Block': _blockNumber,
+      'Bio': '',
     });
   }
 
