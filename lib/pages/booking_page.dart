@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class BookingPage extends StatefulWidget {
   @override
@@ -10,74 +9,107 @@ class BookingPage extends StatefulWidget {
 }
 
 class _BookingPageState extends State<BookingPage> {
+  final currentUser = FirebaseAuth.instance.currentUser;
   DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
-  TimeOfDay selectedTime = TimeOfDay.now();
   static List<String> list = [
     'Hall',
     'Basketball Court',
     'Lounge',
     'Study Room'
   ];
-  List<DropdownMenuItem<String>> dropdownlist =
-      list.map<DropdownMenuItem<String>>((String facilityName) {
-    return DropdownMenuItem<String>(
-      value: facilityName,
-      child: Text(facilityName),
-    );
-  }).toList();
   String? _selectedFacility;
+  Map<DateTime, Map<String, dynamic>> _bookedDates = {};
+  final TextEditingController _remarkController = TextEditingController();
+  Map<String, dynamic>? _currentBooking;
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   fetchHairdressers();
-  // }
+  @override
+  void initState() {
+    super.initState();
+    _selectedFacility = list[0]; // Set default facility
+    _fetchBookings();
+  }
 
-  // fetchHairdressers() async {
-  //   // Fetch facilityies from Firestore and update local list
-  //   var querySnapshot = await FirebaseFirestore.instance
-  //       .collection('Users')
-  //       .where('userType', isEqualTo: 2)
-  //       .get();
-  //   setState(() {
-  //     list = querySnapshot.docs
-  //         .map((doc) => doc.get('userName') as String)
-  //         .toList();
-  //   });
-  // }
+  Future<void> _fetchBookings() async {
+    if (_selectedFacility == null) return;
 
-  Future<void> _selectTime(BuildContext context) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: selectedTime,
-    );
-    if (picked != null && picked != selectedTime) {
-      setState(() {
-        selectedTime = picked;
+    final bookings = await FirebaseFirestore.instance
+        .collection('Bookings')
+        .where('facility', isEqualTo: _selectedFacility)
+        .get();
+
+    setState(() {
+      _bookedDates = {};
+      for (var doc in bookings.docs) {
+        final data = doc.data();
+        final dateTime = DateTime.parse(data['date'] as String);
+        _bookedDates[DateTime(dateTime.year, dateTime.month, dateTime.day)] =
+            data;
+      }
+    });
+    _updateCurrentBooking();
+  }
+
+  void _updateCurrentBooking() {
+    final key =
+        DateTime(_selectedDay.year, _selectedDay.month, _selectedDay.day);
+    setState(() {
+      _currentBooking = _bookedDates[key];
+    });
+  }
+
+  Future<void> bookAppointment() async {
+    final User? user = FirebaseAuth.instance.currentUser;
+    if (user != null && _selectedFacility != null) {
+      final dateString = _selectedDay.toIso8601String().split('T')[0];
+
+      // Fetch user's name from Users collection
+      final userDoc = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(user.email)
+          .get();
+      final userName = userDoc.data()?['Name'] ?? 'Anonymous';
+      final userBlock = userDoc.data()?['Block'] ?? 'Unknown';
+
+      // Check if the facility is already booked for this date
+      final existingBooking = await FirebaseFirestore.instance
+          .collection('Bookings')
+          .where('date', isEqualTo: dateString)
+          .where('facility', isEqualTo: _selectedFacility)
+          .get();
+
+      if (existingBooking.docs.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text(
+                  'This facility is already booked for the selected date.')),
+        );
+        return;
+      }
+
+      // Create a new booking document
+      await FirebaseFirestore.instance.collection('Bookings').add({
+        'userId': user.email,
+        'userName': userName,
+        'userBlock': userBlock,
+        'facility': _selectedFacility,
+        'date': dateString,
+        'remark': _remarkController.text,
       });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Facility Booked!')),
+      );
+
+      await _fetchBookings(); // Refresh bookings
+      _remarkController.clear(); // Clear the remark field
+      _updateCurrentBooking(); // Update current booking state
     }
   }
 
-  bookAppointment() async {
-    final User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final uid = user.uid;
-
-      await FirebaseFirestore.instance.collection('Booking').add({
-        'userId': uid,
-        'facility': _selectedFacility,
-        'date': _selectedDay,
-        'time': selectedTime.format(context),
-      });
-
-      // Show a confirmation message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Facility Booked!'),
-        ),
-      );
-    }
+  bool isDateBooked(DateTime date) {
+    final key = DateTime(date.year, date.month, date.day);
+    return _bookedDates.containsKey(key);
   }
 
   @override
@@ -102,23 +134,15 @@ class _BookingPageState extends State<BookingPage> {
               onDaySelected: (selectedDay, focusedDay) {
                 setState(() {
                   _selectedDay = selectedDay;
-                  _focusedDay =
-                      focusedDay; // update `_focusedDay` here to change the calendar's focus without rebuilding it completely
+                  _focusedDay = focusedDay;
                 });
+                _updateCurrentBooking();
               },
             ),
-            ListTile(
-              title: const Text('Select Time'),
-              trailing: Text(selectedTime.format(context)),
-              onTap: () => _selectTime(context),
-            ),
-
-            // select facility
             Container(
               padding: const EdgeInsets.all(15),
               child: DropdownButton<String>(
-                value:
-                    _selectedFacility, // Initially set to null for empty selection
+                value: _selectedFacility,
                 isExpanded: true,
                 hint: const Text('Select Facility'),
                 icon: const Icon(Icons.arrow_downward),
@@ -126,21 +150,105 @@ class _BookingPageState extends State<BookingPage> {
                 onChanged: (String? value) {
                   setState(() {
                     _selectedFacility = value!;
+                    _fetchBookings(); // Fetch bookings when facility changes
                   });
                 },
-                items: dropdownlist,
-                //     list.map<DropdownMenuItem<String>>((String facilityName) {
-                //   return DropdownMenuItem<String>(
-                //     value: facilityName,
-                //     child: Text(facilityName),
-                //   );
-                // }).toList(),
+                items:
+                    list.map<DropdownMenuItem<String>>((String facilityName) {
+                  return DropdownMenuItem<String>(
+                    value: facilityName,
+                    child: Text(facilityName),
+                  );
+                }).toList(),
               ),
             ),
-            ElevatedButton(
-              onPressed: bookAppointment,
-              child: const Text('Book Facility'),
-            ),
+            if (_currentBooking == null) ...[
+              Padding(
+                padding: const EdgeInsets.all(15),
+                child: TextField(
+                  controller: _remarkController,
+                  decoration: const InputDecoration(
+                    hintText: 'Remark',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: bookAppointment,
+                child: const Text('Book Facility'),
+              ),
+            ] else ...[
+              Padding(
+                padding: const EdgeInsets.all(15),
+                child: Column(
+                  children: [
+                    const Text(
+                      'Someone else has already booked this facility for the day.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 17,
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    const Text(
+                      'Here are the details of the booking',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 17,
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                      width: double.infinity,
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        elevation: 5,
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Facility: ${_currentBooking!['facility']}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Text('Date: ${_currentBooking!['date']}',
+                                  style: const TextStyle(fontSize: 16)),
+                              const SizedBox(height: 5),
+                              Text('Booked by: ${_currentBooking!['userName']}',
+                                  style: const TextStyle(fontSize: 16)),
+                              const SizedBox(height: 5),
+                              Text('Email: ${_currentBooking!['userId']}',
+                                  style: const TextStyle(fontSize: 16)),
+                              const SizedBox(height: 5),
+                              Text('Block: ${_currentBooking!['userBlock']}',
+                                  style: const TextStyle(fontSize: 16)),
+                              const SizedBox(height: 5),
+                              Text('Remark: ${_currentBooking!['remark']}',
+                                  style: const TextStyle(fontSize: 16)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       ),
