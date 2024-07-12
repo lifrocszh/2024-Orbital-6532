@@ -108,7 +108,10 @@ class _HomeState extends State<HomePage> with WidgetsBindingObserver {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ProfilePage()),
+                  MaterialPageRoute(
+                      builder: (context) => ProfilePage(
+                            userEmail: '${currentUser?.email}',
+                          )),
                 );
               },
             ),

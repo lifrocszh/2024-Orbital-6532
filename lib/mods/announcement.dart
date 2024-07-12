@@ -1,39 +1,7 @@
-// class Announcement extends StatelessWidget {
-//   final String message;
-//   final String user;
-//   const Announcement({
-//     super.key,
-//     required this.message,
-//     required this.user,
-//   });
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       decoration: BoxDecoration(
-//         color: Colors.white,
-//         borderRadius: BorderRadius.circular(15),
-//       ),
-//       margin: const EdgeInsets.only(top: 25, left: 25, right: 25),
-//       padding: const EdgeInsets.all(25),
-//       child: Column(
-//         children: [
-//           Text(
-//             user,
-//             style: TextStyle(
-//               color: Colors.grey[500],
-//             ),
-//           ),
-//           const SizedBox(height: 10),
-//           Text(message),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:orbital/pages/profile_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Announcement extends StatefulWidget {
   final String message;
@@ -41,6 +9,7 @@ class Announcement extends StatefulWidget {
   final String docId;
   final Map<String, dynamic> votes;
   final Function(String, bool) onVote;
+  final String userEmail; // Add this line
 
   const Announcement({
     Key? key,
@@ -49,6 +18,7 @@ class Announcement extends StatefulWidget {
     required this.docId,
     required this.votes,
     required this.onVote,
+    required this.userEmail,
   }) : super(key: key);
 
   @override
@@ -90,32 +60,73 @@ class _AnnouncementState extends State<Announcement> {
     }
   }
 
+  Future<String?> _getProfileImageUrl(String email) async {
+    final userDoc =
+        await FirebaseFirestore.instance.collection('Users').doc(email).get();
+    return userDoc['profilePicture'];
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(widget.user,
-                style: const TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 4),
-            Text(widget.message),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('People Coming: $voteCount'),
-                ElevatedButton(
-                  onPressed: hasVoted ? null : _handleVote,
-                  child: Text(hasVoted ? 'Voted' : 'Coming'),
-                ),
-              ],
+    return FutureBuilder(
+        future: _getProfileImageUrl(widget.userEmail),
+        builder: (context, snapshot) {
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ProfilePage(userEmail: widget.userEmail),
+                            ),
+                          );
+                        },
+                        child:
+                            // const Icon(Icons.person, size: 24),
+                            snapshot.connectionState == ConnectionState.waiting
+                                ? CircularProgressIndicator()
+                                : CircleAvatar(
+                                    radius: 20,
+                                    backgroundImage: snapshot.hasData &&
+                                            snapshot.data != null
+                                        ? NetworkImage(snapshot.data!)
+                                        : null,
+                                    child: snapshot.hasData &&
+                                            snapshot.data != null
+                                        ? null
+                                        : const Icon(Icons.person, size: 24),
+                                  ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(widget.user,
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(widget.message),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('People Coming: $voteCount'),
+                      ElevatedButton(
+                        onPressed: hasVoted ? null : _handleVote,
+                        child: Text(hasVoted ? 'Voted' : 'Coming'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
-      ),
-    );
+          );
+        });
   }
 }
