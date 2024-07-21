@@ -28,10 +28,6 @@ class _RegisterPageState extends State<RegisterPage> {
   Future addUserDetails() async {
     await FirebaseFirestore.instance
         .collection('Users')
-        // .add({
-        //   'Name': _nameController.text,
-        //   'Block': _blockNumber,
-        //   'Email': _emailController.text,
         .doc(_emailController.text)
         .set({
       'Name': _nameController.text,
@@ -41,7 +37,6 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> createUserWithEmailAndPassword() async {
-    // print('submit button clicked');
     if (!passwordsMatch()) {
       setState(() {
         errorMessage = 'Passwords do not match';

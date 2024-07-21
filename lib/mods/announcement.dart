@@ -9,7 +9,7 @@ class Announcement extends StatefulWidget {
   final String docId;
   final Map<String, dynamic> votes;
   final Function(String, bool) onVote;
-  final String userEmail; // Add this line
+  final String userEmail;
 
   const Announcement({
     Key? key,

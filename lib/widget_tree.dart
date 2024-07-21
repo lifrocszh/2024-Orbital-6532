@@ -18,11 +18,8 @@ class _WidgetTreeState extends State<WidgetTree> {
       stream: Auth().authStateChanges,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          print('going homepage');
           return HomePage();
         } else {
-          print('gg login page'); // remember change back to LoginPage()
-
           return AuthPage();
         }
       },
