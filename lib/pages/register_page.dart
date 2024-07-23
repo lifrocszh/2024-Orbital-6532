@@ -49,6 +49,10 @@ class _RegisterPageState extends State<RegisterPage> {
       setState(() {
         errorMessage = 'Please enter your block number';
       });
+    } else if (_emailController.text.isEmpty) {
+      setState(() {
+        errorMessage = 'Please enter your email';
+      });
     } else {
       try {
         await Auth().createUserWithEmailAndPassword(
