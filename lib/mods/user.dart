@@ -19,7 +19,7 @@ class GetUserID extends StatelessWidget {
               snapshot.data!.data() as Map<String, dynamic>;
           return Text('Name: ${data['Name']}');
         }
-        return const Text('Loading');
+        return Text('Loading');
       },
     );
   }
