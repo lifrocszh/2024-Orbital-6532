@@ -8,6 +8,7 @@ import 'announcement_page.dart';
 import 'package:orbital/mods/list_tile.dart';
 import 'package:intl/intl.dart';
 import 'package:orbital/mods/booking.dart';
+import 'package:orbital/pages/messageslist_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -89,6 +90,21 @@ class _HomeState extends State<HomePage> with WidgetsBindingObserver {
         ),
         centerTitle: true,
         backgroundColor: Colors.greenAccent,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.message),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MessagesListPage(
+                    currentUserEmail: '${currentUser?.email}',
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       drawer: Drawer(
         backgroundColor: const Color.fromRGBO(0, 64, 39, 1),
@@ -109,9 +125,11 @@ class _HomeState extends State<HomePage> with WidgetsBindingObserver {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => ProfilePage(
-                            userEmail: '${currentUser?.email}',
-                          )),
+                    builder: (context) => ProfilePage(
+                      userEmail: '${currentUser?.email}',
+                      currentUserEmail: '${currentUser?.email}',
+                    ),
+                  ),
                 );
               },
             ),

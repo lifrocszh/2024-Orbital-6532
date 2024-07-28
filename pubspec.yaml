@@ -47,6 +47,7 @@ dependencies:
   fake_cloud_firestore: ^3.0.1
   plugin_platform_interface: ^2.1.8
   firebase_core_platform_interface: ^5.1.0
+  firebase_messaging: ^15.0.3
 
 dev_dependencies:
   flutter_test:

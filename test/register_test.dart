@@ -39,10 +39,9 @@ void main() {
       ),
     );
 
-    // Check for presence of key widgets and texts
     expect(find.text('HELLO THERE!'), findsOneWidget);
     expect(find.text('Register below with your details'), findsOneWidget);
-    expect(find.byType(TextField), findsNWidgets(4)); // 4 text fields
+    expect(find.byType(TextField), findsNWidgets(4));
     expect(find.byType(DropdownButton<String>), findsOneWidget);
     expect(find.byType(ElevatedButton), findsOneWidget);
     expect(find.byType(TextButton), findsOneWidget);
@@ -100,7 +99,7 @@ void main() {
     await pumpRegisterPage(tester);
 
     await tester.enterText(find.byType(TextField).at(0), 'Test User');
-    await tester.enterText(find.byType(TextField).at(1), ''); // Empty email
+    await tester.enterText(find.byType(TextField).at(1), '');
     await tester.enterText(find.byType(TextField).at(2), 'password');
     await tester.enterText(find.byType(TextField).at(3), 'password');
     await tester.tap(find.byType(DropdownButton<String>));

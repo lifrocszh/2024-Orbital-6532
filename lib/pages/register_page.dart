@@ -15,7 +15,6 @@ class _RegisterPageState extends State<RegisterPage> {
   String? errorMessage = '';
   bool isLogin = true;
 
-  // final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
@@ -28,10 +27,6 @@ class _RegisterPageState extends State<RegisterPage> {
   Future addUserDetails() async {
     await FirebaseFirestore.instance
         .collection('Users')
-        // .add({
-        //   'Name': _nameController.text,
-        //   'Block': _blockNumber,
-        //   'Email': _emailController.text,
         .doc(_emailController.text)
         .set({
       'Name': _nameController.text,
@@ -41,7 +36,6 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> createUserWithEmailAndPassword() async {
-    // print('submit button clicked');
     if (!passwordsMatch()) {
       setState(() {
         errorMessage = 'Passwords do not match';
@@ -179,11 +173,9 @@ class _RegisterPageState extends State<RegisterPage> {
                           padding: const EdgeInsets.only(
                               top: 10, left: 10, right: 10),
                           child: DropdownButton<String>(
-                            value:
-                                _blockNumber, // Initially set to null for empty selection
+                            value: _blockNumber,
                             isExpanded: true,
                             hint: const Text('Block Number'),
-
                             icon: const Icon(Icons.arrow_downward),
                             elevation: 10,
                             dropdownColor: Colors.grey[100],

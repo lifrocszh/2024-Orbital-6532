@@ -9,7 +9,7 @@ class Announcement extends StatefulWidget {
   final String docId;
   final Map<String, dynamic> votes;
   final Function(String, bool) onVote;
-  final String userEmail; // Add this line
+  final String userEmail;
 
   const Announcement({
     Key? key,
@@ -81,29 +81,30 @@ class _AnnouncementState extends State<Announcement> {
                     children: [
                       GestureDetector(
                         onTap: () {
+                          final currentUser = FirebaseAuth.instance.currentUser;
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  ProfilePage(userEmail: widget.userEmail),
+                              builder: (context) => ProfilePage(
+                                userEmail: widget.userEmail,
+                                currentUserEmail: currentUser?.email ?? '',
+                              ),
                             ),
                           );
                         },
-                        child:
-                            // const Icon(Icons.person, size: 24),
-                            snapshot.connectionState == ConnectionState.waiting
-                                ? CircularProgressIndicator()
-                                : CircleAvatar(
-                                    radius: 20,
-                                    backgroundImage: snapshot.hasData &&
-                                            snapshot.data != null
+                        child: snapshot.connectionState ==
+                                ConnectionState.waiting
+                            ? CircularProgressIndicator()
+                            : CircleAvatar(
+                                radius: 20,
+                                backgroundImage:
+                                    snapshot.hasData && snapshot.data != null
                                         ? NetworkImage(snapshot.data!)
                                         : null,
-                                    child: snapshot.hasData &&
-                                            snapshot.data != null
-                                        ? null
-                                        : const Icon(Icons.person, size: 24),
-                                  ),
+                                child: snapshot.hasData && snapshot.data != null
+                                    ? null
+                                    : const Icon(Icons.person, size: 24),
+                              ),
                       ),
                       const SizedBox(width: 8),
                       Text(widget.user,
