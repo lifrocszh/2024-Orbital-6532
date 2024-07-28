@@ -42,13 +42,13 @@ class _ProfilePageState extends State<ProfilePage> {
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile picture updated successfully')),
+          SnackBar(content: Text('Profile picture updated successfully')),
         );
       }
     } catch (e) {
       print('Error updating profile picture: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
             content:
                 Text('Failed to update profile picture. Please try again.')),
       );
@@ -65,7 +65,7 @@ class _ProfilePageState extends State<ProfilePage> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bio updated successfully')),
+        SnackBar(content: Text('Bio updated successfully')),
       );
       setState(() {
         _isEditingBio = false;
@@ -73,8 +73,7 @@ class _ProfilePageState extends State<ProfilePage> {
     } catch (e) {
       print('Error updating bio: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Failed to update bio. Please try again.')),
+        SnackBar(content: Text('Failed to update bio. Please try again.')),
       );
     }
   }
@@ -118,7 +117,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                       ? NetworkImage(userData['profilePicture'])
                                       : null,
                               child: userData['profilePicture'] == null
-                                  ? const Icon(Icons.person, size: 60)
+                                  ? Icon(Icons.person, size: 60)
                                   : null,
                             ),
                             Positioned(
@@ -127,12 +126,12 @@ class _ProfilePageState extends State<ProfilePage> {
                               child: GestureDetector(
                                 onTap: _updateProfilePicture,
                                 child: Container(
-                                  decoration: const BoxDecoration(
+                                  decoration: BoxDecoration(
                                     color: Colors.greenAccent,
                                     shape: BoxShape.circle,
                                   ),
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(8.0),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
                                     child: Icon(Icons.edit, size: 20),
                                   ),
                                 ),
@@ -141,7 +140,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      SizedBox(height: 20),
                       Center(
                         child: Column(
                           children: [
@@ -213,7 +212,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                       TextField(
                                         controller: _bioController,
                                         maxLines: 3,
-                                        decoration: const InputDecoration(
+                                        decoration: InputDecoration(
                                           hintText: 'Enter your bio',
                                           border: OutlineInputBorder(),
                                         ),
